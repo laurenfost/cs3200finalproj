@@ -32,7 +32,7 @@ CREATE TABLE temp (
 
 -- LOAD CSV 
 LOAD DATA LOCAL 
-INFILE '/Users/annatang/Downloads/ed.csv'
+INFILE 'C:/Users/laure/OneDrive/Documents/cs3200/final_proj/emergency_dept.csv'
 INTO TABLE temp
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' -- terminated by ';' in orig
 IGNORE 1 ROWS; 
@@ -55,7 +55,9 @@ CREATE TABLE hospitals (
 INSERT INTO hospitals (hospital_id,
     hospital_name,
     county,
-    hospital_system)
+    hospital_system,
+    LONGITUDE,
+    LATITUDE)
 SELECT hospital_id, 
 	MIN(hospital_name) AS hospital_name,
     MIN(county) AS county,
@@ -136,7 +138,7 @@ CREATE TABLE ed_capacity (
     PRIMARY KEY (hospital_id, year)
 );
 INSERT INTO ed_capacity (hospital_id, year, ed_station_count)
-SELECT hospital_id, year, ed_station_count
+SELECT DISTINCT hospital_id, year, ed_station_count
 FROM temp;
 
 SELECT * FROM ed_capacity;
