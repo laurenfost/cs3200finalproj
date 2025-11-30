@@ -86,7 +86,7 @@ GROUP BY s.in_mental_health_shortage;
 SELECT DISTINCT h.county
 FROM shortage_designations s
 JOIN hospitals h ON h.hospital_id = s.hospital_id
-WHERE s.in_primary_care_shortage = 'Yes' AND s.in_mental_health_shortage = 'Yes'
+WHERE s.in_primary_care_shortage = 1 AND s.in_mental_health_shortage = 1
 ORDER BY h.county;
 
 
