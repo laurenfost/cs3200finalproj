@@ -195,7 +195,7 @@ WHERE t.health_condition != 'All ED Visits';
 SELECT *
 FROM ed_visits;
 
--- HOSPITAL-VISIT TYPE TABLE 
+-- HOSPITAL VISIT TYPE TABLE 
 -- specifies which hospitals have seen what categories
 DROP TABLE IF EXISTS hospital_visit_type;
 
@@ -213,3 +213,27 @@ FROM temp t
 JOIN visit_type v ON t.health_condition = v.category_name;
     
 SELECT * FROM hospital_visit_type;
+
+-- TOTAL ED ENCOUNTERS
+-- stores the total ED encounters
+DROP TABLE IF EXISTS total_ed_encounters;
+
+DROP TABLE IF EXISTS ed_encounter_totals;
+
+CREATE TABLE ed_encounter_totals (
+    hospital_id INT,
+    year YEAR,
+    ed_encounter_total INT,
+    PRIMARY KEY (hospital_id, year),
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(hospital_id)
+);
+
+INSERT INTO ed_encounter_totals (hospital_id, year, ed_encounter_total)
+SELECT hospital_id,
+       year,
+       ed_encounter_total
+FROM temp
+WHERE health_condition = 'All ED Visits';
+
+SELECT *
+FROM ed_encounter_totals;

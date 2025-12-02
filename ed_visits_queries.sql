@@ -146,3 +146,26 @@ LEFT JOIN hospital_visit_type hvt
 WHERE hvt.category_id IS NULL
 GROUP BY h.hospital_id, h.hospital_name
 ORDER BY num_missing DESC;
+
+-- find total of ED visits that were uncategorized/unkown
+SELECT 
+    h.hospital_name,
+    t.year,
+    t.total AS total_visits,
+    IFNULL(SUM(v.ed_visits_by_category), 0) AS 'categorized_visits',
+    t.total - IFNULL(SUM(v.ed_visits_by_category), 0) AS 'unkown_visits'
+FROM total_ed_encounters t
+LEFT JOIN ed_visits v
+    ON t.hospital_id = v.hospital_id
+   AND t.year = v.year
+JOIN hospitals h
+    ON h.hospital_id = t.hospital_id
+GROUP BY h.hospital_name, t.year, t.total
+HAVING uncategorized_visits > 0
+ORDER BY h.hospital_name, t.year;
+
+
+
+
+
+
