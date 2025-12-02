@@ -126,7 +126,6 @@ ORDER BY s.in_primary_care_shortage, s.in_mental_health_shortage DESC;
 
 -- lists health_conditionas that weren't visited at Hospitals
 SELECT 
-    h.hospital_id,
     h.hospital_name,
     GROUP_CONCAT(v.category_name ORDER BY v.category_name) AS missing_categories
 FROM hospitals h
@@ -135,8 +134,8 @@ LEFT JOIN hospital_visit_type hvt
     ON hvt.hospital_id = h.hospital_id
     AND hvt.category_id = v.category_id
 WHERE hvt.category_id IS NULL
-GROUP BY h.hospital_id, h.hospital_name
-ORDER BY h.rural_urban_classification;
+GROUP BY h.hospital_id, h.hospital_name;
+
 
 
 -- find total of ED visits that were uncategorized/unkown
