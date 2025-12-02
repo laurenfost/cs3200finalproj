@@ -218,17 +218,15 @@ SELECT * FROM hospital_visit_type;
 -- stores the total ED encounters
 DROP TABLE IF EXISTS total_ed_encounters;
 
-DROP TABLE IF EXISTS ed_encounter_totals;
-
-CREATE TABLE ed_encounter_totals (
+CREATE TABLE total_ed_encounters (
     hospital_id INT,
     year YEAR,
-    ed_encounter_total INT,
+    total INT,
     PRIMARY KEY (hospital_id, year),
     FOREIGN KEY (hospital_id) REFERENCES hospitals(hospital_id)
 );
 
-INSERT INTO ed_encounter_totals (hospital_id, year, ed_encounter_total)
+INSERT INTO total_ed_encounters (hospital_id, year, total)
 SELECT hospital_id,
        year,
        ed_encounter_total
@@ -236,4 +234,4 @@ FROM temp
 WHERE health_condition = 'All ED Visits';
 
 SELECT *
-FROM ed_encounter_totals;
+FROM total_ed_encounters;
