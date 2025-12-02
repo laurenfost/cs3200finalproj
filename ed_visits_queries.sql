@@ -52,21 +52,12 @@ JOIN ed_visits v ON v.hospital_id = c.hospital_id
 GROUP BY c.ownership
 ORDER BY avg_visits_per_station DESC;
 
--- top 5 health conditions with highest and lowest avg # visits/station 
+-- health conditions ordered avg # visits/station 
 SELECT vt.category_name, ROUND(AVG(v.visits_per_station), 2) AS 'avg_visits_per_station'
 FROM ed_visits v
 JOIN visit_type vt ON vt.category_id = v.category_id
 GROUP BY vt.category_name
-ORDER BY avg_visits_per_station DESC
-LIMIT 5;
-
-SELECT vt.category_name,
-       ROUND(AVG(v.visits_per_station), 2) AS 'avg_visits_per_station'
-FROM ed_visits v
-JOIN visit_type vt ON vt.category_id = v.category_id
-GROUP BY vt.category_name
-ORDER BY avg_visits_per_station ASC
-LIMIT 5;
+ORDER BY avg_visits_per_station DESC;
 
 -- compare avg # visits/station for primary care shortage areas and non shortage
 SELECT s.in_mental_health_shortage AS mental_health_shortage_area,
@@ -92,12 +83,12 @@ ORDER BY h.county;
 -- largest average ED visit increase 
 SELECT 
 	DISTINCT(h.hospital_name),
-    e.earliest_year,
-    l.latest_year,
-    e.total_earliest,
-    l.total_latest,
-    (l.total_latest - e.total_earliest) / (l.latest_year - e.earliest_year) AS 'avg_yearly_increase'
+    (l.total_latest - e.total_earliest) / (l.latest_year - e.earliest_year) AS 'avg_yearly_increase',
+    s.in_primary_care_shortage,
+    s.in_mental_health_shortage
 FROM hospitals h
+JOIN shortage_designations s
+	ON h.hospital_id = s.hospital_id
 JOIN (
 	-- earliest year + total visits in that year 
     SELECT t.hospital_id,
@@ -131,21 +122,22 @@ JOIN (
      ) AS l
      ON h.hospital_id = l.hospital_id
 WHERE l.latest_year > e.earliest_year   
-ORDER BY avg_yearly_increase DESC;
+ORDER BY s.in_primary_care_shortage, s.in_mental_health_shortage DESC;
 
--- hospitals that weren't visited by AT LEAST one category visit 
+-- lists health_conditionas that weren't visited at Hospitals
 SELECT 
-	h.hospital_id,
+    h.hospital_id,
     h.hospital_name,
-    COUNT(v.category_id) AS 'num_missing'
+    GROUP_CONCAT(v.category_name ORDER BY v.category_name) AS missing_categories
 FROM hospitals h
 CROSS JOIN visit_type v
 LEFT JOIN hospital_visit_type hvt
     ON hvt.hospital_id = h.hospital_id
-		AND hvt.category_id = v.category_id
+    AND hvt.category_id = v.category_id
 WHERE hvt.category_id IS NULL
 GROUP BY h.hospital_id, h.hospital_name
-ORDER BY num_missing DESC;
+ORDER BY h.rural_urban_classification;
+
 
 -- find total of ED visits that were uncategorized/unkown
 SELECT 
@@ -157,13 +149,12 @@ SELECT
 FROM total_ed_encounters t
 LEFT JOIN ed_visits v
     ON t.hospital_id = v.hospital_id
-   AND t.year = v.year
+    AND t.year = v.year
 JOIN hospitals h
     ON h.hospital_id = t.hospital_id
 GROUP BY h.hospital_name, t.year, t.total
-HAVING uncategorized_visits > 0
-ORDER BY h.hospital_name, t.year;
-
+HAVING unkown_visits > 0
+ORDER BY unkown_visits DESC;
 
 
 
